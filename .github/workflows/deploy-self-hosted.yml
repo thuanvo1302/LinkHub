@@ -27,12 +27,22 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
+      - name: Copy deploy env from runner host
+        shell: bash
+        run: |
+          SOURCE_ENV="/mnt/c/Link-in-bio/deploy/.env.prod"
+          test -f "$SOURCE_ENV" || {
+            echo "Missing $SOURCE_ENV on the runner machine."
+            echo "Create it from deploy/.env.prod.example first."
+            exit 1
+          }
+          cp "$SOURCE_ENV" deploy/.env.prod
+
       - name: Verify deploy env file
         shell: bash
         run: |
           test -f deploy/.env.prod || {
-            echo "Missing deploy/.env.prod on runner workspace."
-            echo "Copy deploy/.env.prod.example to deploy/.env.prod and fill real values on the runner."
+            echo "Missing deploy/.env.prod inside workflow workspace."
             exit 1
           }
 
