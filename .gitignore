@@ -1,0 +1,12 @@
+backend/.env
+backend/bin/
+frontend/.next/
+frontend/node_modules/
+frontend/.env.local
+*.log
+*.err.log
+backend/*-dev.log
+backend/*-dev.err.log
+frontend/*-dev.log
+frontend/*-dev.err.log
+dist/
