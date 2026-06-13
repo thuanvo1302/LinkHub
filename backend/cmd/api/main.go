@@ -100,6 +100,7 @@ func main() {
 			"description": "Link-in-bio and URL shortener MVP API",
 		}, "OK")
 	})
+	mux.HandleFunc("GET /s/{code}", rateLimiter.IP(300, time.Minute, shortHandler.Redirect))
 	mux.HandleFunc("GET /{code}", rateLimiter.IP(300, time.Minute, shortHandler.Redirect))
 
 	handler := middleware.CORS(cfg, middleware.SecurityHeaders(middleware.Logging(mux)))

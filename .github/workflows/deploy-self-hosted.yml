@@ -1,0 +1,50 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to deploy
+        required: false
+        default: main
+      environment_name:
+        description: Deployment environment label
+        required: false
+        default: production
+
+jobs:
+  deploy:
+    name: Deploy to Self-Hosted Runner
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - linkhub
+    environment:
+      name: ${{ inputs.environment_name }}
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Verify deploy env file
+        shell: bash
+        run: |
+          test -f deploy/.env.prod || {
+            echo "Missing deploy/.env.prod on runner workspace."
+            echo "Copy deploy/.env.prod.example to deploy/.env.prod and fill real values on the runner."
+            exit 1
+          }
+
+      - name: Deploy stack
+        shell: bash
+        run: |
+          chmod +x deploy/scripts/deploy-self-hosted.sh
+          ./deploy/scripts/deploy-self-hosted.sh
+
+      - name: Show running services
+        shell: bash
+        run: |
+          docker compose --env-file deploy/.env.prod -f deploy/docker-compose.prod.yml ps
+

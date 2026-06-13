@@ -69,7 +69,7 @@ export function ShortLinksManager() {
         {items.map((item) => (
           <div key={item.id} className="rounded-2xl bg-white px-4 py-4">
             <div className="font-semibold">{item.title || item.code}</div>
-            <div className="text-sm text-black/55">{API_URL}/{item.code}</div>
+            <div className="text-sm text-black/55">{API_URL}/s/{item.code}</div>
             <div className="mt-1 text-xs text-black/45">{item.original_url}</div>
           </div>
         ))}
@@ -77,4 +77,3 @@ export function ShortLinksManager() {
     </div>
   );
 }
-

@@ -73,6 +73,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 	code := strings.TrimPrefix(r.URL.Path, "/")
+	code = strings.TrimPrefix(code, "s/")
 	if code == "" {
 		response.OK(w, map[string]string{"message": "welcome"}, "OK")
 		return

@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: linkhub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-linkhub}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../backend/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - linkhub_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: linkhub-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - linkhub_net
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: linkhub-backend
+    restart: unless-stopped
+    environment:
+      APP_NAME: LinkHub API
+      APP_ENV: production
+      APP_PORT: 8081
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-linkhub}?sslmode=disable
+      REDIS_ADDR: redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - linkhub_net
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: linkhub-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost}
+    depends_on:
+      - backend
+    networks:
+      - linkhub_net
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: linkhub-nginx
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - linkhub_net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  linkhub_net:

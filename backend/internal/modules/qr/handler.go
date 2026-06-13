@@ -37,7 +37,7 @@ func (h *Handler) ShortLinkSVG(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "short link not found", http.StatusNotFound)
 		return
 	}
-	target := fmt.Sprintf("%s/%s", h.cfg.AppBaseURL, item.Code)
+	target := fmt.Sprintf("%s/s/%s", h.cfg.AppBaseURL, item.Code)
 	writeSVG(w, target, "Short Link QR")
 }
 
